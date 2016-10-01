@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Emitt Web</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
+
+    <style>
+          #v_back
+          {
+              position: absolute;
+              top: 130px;
+              height: 320px;
+              width: 680px;
+          }
+    </style>
+  </head>
+  <body>
+
+    <!-- <div class="container" id="v_back"> -->
+        <video src="" id="video" style="width:680px;height:320px" autoplay="true"></video>
+        Emtter
+    <!-- </div> -->
+
+    <canvas id="preview" style="display:none;"></canvas>
+    <div id="logger"></div>
+    <script type="text/javascript">
+            var canvas = document.getElementById("preview");
+            var context = canvas.getContext("2d");
+
+            canvas.width = 800;
+            canvas.height = 600;
+
+            context.width = canvas.width;
+            context.height = canvas.height;
+
+            var video = document.getElementById("video");
+            var socket = io();
+
+            function logger(msg){
+              $("#logger").text(msg);
+            }
+
+            function loadCam(stream){
+                video.src = window.URL.createObjectURL(stream);
+                logger('Camera Working OK !')
+            }
+            function loadFail(){
+                logger('Camera NOT Working !');
+            }
+
+            function viewVideo(video,context){
+                  context.drawImage(video,0,0,context.width,context.height);
+                  socket.emit('stream',canvas.toDataURL('image/webp'));
+            }
+            $(function(){
+                  navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msgGetUserMedia);
+                  if(navigator.getUserMedia)
+                  {
+                    //
+                    navigator.getUserMedia({video : true},loadCam,loadFail);
+                  }
+                  setInterval(function(){
+                      viewVideo(video,context);
+                  },70);
+            });
+    </script>
+  </body>
+</html>
